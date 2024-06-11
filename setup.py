@@ -4,7 +4,7 @@ import sys
 import os
 
 def install_libraries():
-    required_libraries = ["cryptography", "pytube", "feedparser"]
+    required_libraries = ["cryptography", "pytube", "feedparser", "base64", "argparse", "requests"]
     missing_libraries = []
     for library in required_libraries:
         try:
