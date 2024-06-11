@@ -30,15 +30,24 @@ def load_api_key():
 
     else:
         api_key = input("Enter your YouTube Data API Key: ").strip()
-        encrypt = input("Do you want to encrypt the API key? (yes/no): ").lower().strip()
-        if encrypt == "yes":
+        time.sleep(1)
+        while True:
+            encrypt = input("Do you want to encrypt the API key? (yes/no): ").lower().strip()
+            if encrypt in ["yes", "yup", "okay", "sure", "y"]:
+                break
+            elif encrypt in ["no", "nope", "nah", "not now", "n"]:
+                break
+            else:
+                log("Invalid input. Please enter 'yes' or 'no' or their alternatives.")
+
+        if encrypt in ["yes", "yup", "okay", "sure", "y"]:
             password = get_password()
             encrypt_api_key(api_key, password)
         else:
             with open("api.txt", "w") as file:
                 file.write(api_key)
         return api_key
-
+    
 def get_password():
     while True:
         password = input("Enter your password: ")
