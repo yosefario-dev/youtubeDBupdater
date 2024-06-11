@@ -22,6 +22,8 @@ The YouTubeDBUpdater application streamlines the process of monitoring and downl
 ### Channel Listing:
 1. Open the channels.txt file, which was automatically created during setup.
 2. Here, list the YouTube channels you wish to monitor, with each channel link on a separate line.
+3. Example of YoutTube channel URL: https://www.youtube.com/@Psych2go
+If a channel doesn't have @ type URL, type a channel title (it will search for the title in the YouTube Database.).
 
 ### Executing the Application:
 1. Launch the application by running the app.py script.
