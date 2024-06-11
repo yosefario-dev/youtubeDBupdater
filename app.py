@@ -8,7 +8,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
-
+import getpass
 def load_api_key():
     if os.path.exists("api.txt"):
         with open("api.txt", "r") as file:
@@ -50,8 +50,8 @@ def load_api_key():
     
 def get_password():
     while True:
-        password = input("Enter your password: ")
-        confirm_password = input("Confirm your password: ")
+        password = getpass.getpass("Enter your password: ")
+        confirm_password = getpass.getpass("Confirm your password: ")
         if password == confirm_password:
             return password
         log("Passwords do not match. Please try again.")
@@ -105,7 +105,6 @@ def main():
     api_key = load_api_key()
     while True:
         try:
-            log(api_key)
             log("Updating Channel List...")
             subprocess.run(["python", "build_rss.py", "-api", api_key], check=True)
             

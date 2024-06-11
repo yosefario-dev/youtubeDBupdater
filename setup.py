@@ -4,7 +4,7 @@ import sys
 import os
 
 def install_libraries():
-    required_libraries = ["cryptography", "pytube", "feedparser", "base64", "argparse", "requests"]
+    required_libraries = ["cryptography", "pytube", "feedparser", "base64", "argparse", "requests", "getpass"]
     missing_libraries = []
     for library in required_libraries:
         try:
@@ -20,7 +20,7 @@ def setup_channels_file():
         with open("channels.txt", "w") as file:
             file.write("# Add your YouTube channel links here, one per line\n")
             file.write("# Example:\n")
-            file.write("# https://www.youtube.com/@example_channel\n")
+            file.write("# https://www.youtube.com/user/example_channel\n")
 
 def print_application_info():
     print("YouTube Channel Updater Setup")
