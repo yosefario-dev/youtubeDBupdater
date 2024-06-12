@@ -39,13 +39,13 @@ def get_video_links_from_rss(api_key):
         return
 
     with open(rss_file, 'r') as f:
-        rss_links = f.read().splitlines()
+        rss_links = [line.split(' ::: ')[1] for line in f.read().splitlines()]
 
     for rss_link in rss_links:
         # Extract creator name from RSS link
-        creator_id = rss_link.split('=')[-1]
+        channel_id = rss_link.split('=')[-1].split('&')[0]
         try:
-            creator_name = get_channel_title(creator_id, api_key)
+            creator_name = get_channel_title(channel_id, api_key)
         except ValueError as e:
             log(str(e))
             continue

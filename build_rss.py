@@ -36,35 +36,33 @@ def build_rss(api_key):
 
     if not os.path.exists(rss_file):
         open(rss_file, 'w').close()  # Create an empty rss.txt if it doesn't exist
+        log("Created empty rss.txt file.")
 
     with open(channels_file, 'r') as f:
         channels = f.read().splitlines()
 
-    existing_rss = set()
+    rss_table = {}
     with open(rss_file, 'r') as f:
-        existing_rss = set(f.read().splitlines())
+        for line in f:
+            youtube_url, rss_url = line.strip().split(' ::: ')
+            rss_table[youtube_url] = rss_url
 
-    new_rss = set()
     for channel_url in channels:
-        channel_title = channel_url.split('@')[-1]
-        try:
-            channel_id = get_channel_id(channel_title, api_key)
-        except ValueError as e:
-            log(str(e))
-            continue
+        if channel_url in rss_table:
+            log(f"RSS feed for @{channel_url.split('@')[-1]} already exists.")
+        else:
+            channel_title = channel_url.split('@')[-1]
+            try:
+                channel_id = get_channel_id(channel_title, api_key)
+            except ValueError as e:
+                log(str(e))
+                continue
 
-        if channel_id:
-            rss_link = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
-            if rss_link not in existing_rss:
-                new_rss.add(rss_link)
-
-    if new_rss:
-        with open(rss_file, 'a') as f:
-            for rss_link in new_rss:
-                f.write(rss_link + '\n')
-        log("RSS feeds updated.")
-    else:
-        log("No new RSS feeds to add.")
+            if channel_id:
+                rss_link = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+                with open(rss_file, 'a') as f:
+                    f.write(f"{channel_url} ::: {rss_link}\n")
+                log(f"Added RSS feed for @{channel_title}.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build RSS feeds for YouTube channels.")

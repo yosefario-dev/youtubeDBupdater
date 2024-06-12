@@ -119,8 +119,8 @@ def main():
                 subprocess.run(["python", "download.py"], check=True)
             else:
                 log("No New Videos Detected. Skipping download.")
-            log("Sleeping for 1 minute...")
-            time.sleep(60)            
+            log("Sleeping for 2 minutes...")
+            time.sleep(120)            
             clear_console()
         
         except Exception as e:
