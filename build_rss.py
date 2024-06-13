@@ -1,17 +1,29 @@
 import os
 import datetime
-from pytube import Channel
+from pytube import Channel, Playlist
 
 def log(message):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"{timestamp} > {message}")
 
-def get_info(channel_url):
+def read_config(config_file='config.txt'):
+    config = {}
+    with open(config_file, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                key, value = line.split(' = ')
+                config[key.strip()] = value.strip()
+    return config
+
+def get_channel_info(channel_url):
     if channel_url.startswith('https://www.youtube.com/@'):
         channel_name = channel_url.split('/')[-1].replace('@', '')
         channel_url = f"https://www.youtube.com/c/{channel_name}"
     elif channel_url.startswith('https://www.youtube.com/c/'):
         channel_name = channel_url.split('/')[-1]
+    elif channel_url.startswith('https://www.youtube.com/channel/'):
+        channel_name = "Unknown Channel Name"
     else:
         log("Error: Invalid channel URL format.")
         return None, None
@@ -25,9 +37,19 @@ def get_info(channel_url):
         log(f"Error getting channel info: {e}")
         return None, None
 
+def get_playlist_info(playlist_url):
+    try:
+        playlist = Playlist(playlist_url)
+        playlist_name = playlist.title
+        return playlist_name, playlist_url
+    except Exception as e:
+        log(f"Error getting playlist info: {e}")
+        return None, None
+
 def build_rss():
-    channels_file = "channels.txt"
-    rss_file = "rss.txt"
+    config = read_config()
+    channels_file = config['channels_file']
+    rss_file = config['rss_file']
 
     if not os.path.exists(channels_file):
         log("Error: channels.txt not found.")
@@ -44,21 +66,27 @@ def build_rss():
         existing_lines = f.readlines()
 
     for channel_url in channels:
-        try:
-            channel_id, channel_name_api = get_info(channel_url)
-        except Exception as e:
-            log(f"Error getting channel info: {e}")
-            continue
-
-        if channel_id:
-            rss_link = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
-            line = f"{channel_name_api} :: {channel_url} ::: {rss_link}\n"
-            if line not in existing_lines:
-                with open(rss_file, 'a') as f:
-                    f.write(line)
-                log(f"Added RSS feed for {channel_name_api}.")
-            else:
-                log(f"Skipping {channel_name_api} - already exists in rss.txt")
+        if "youtube.com/playlist" in channel_url:
+            playlist_name, playlist_url = get_playlist_info(channel_url)
+            if playlist_name and playlist_url:
+                line = f"{playlist_name} :: {playlist_url} ::: {playlist_url}\n"
+                if line not in existing_lines:
+                    with open(rss_file, 'a') as f:
+                        f.write(line)
+                    log(f"Added playlist {playlist_name}.")
+                else:
+                    log(f"Skipping playlist {playlist_name} - already exists.")
+        else:
+            channel_id, channel_name_api = get_channel_info(channel_url)
+            if channel_id:
+                rss_link = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+                line = f"{channel_name_api} :: {channel_url} ::: {rss_link}\n"
+                if line not in existing_lines:
+                    with open(rss_file, 'a') as f:
+                        f.write(line)
+                    log(f"Added RSS feed for {channel_name_api}.")
+                else:
+                    log(f"Skipping {channel_name_api} - already exists.")
 
 if __name__ == "__main__":
     try:

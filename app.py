@@ -2,13 +2,24 @@ import os
 import subprocess
 import time
 import datetime
-def handle_error(error):
-    error_message = str(error)
-    subprocess.run(["python", "repair_tool.py -error", error_message])
 
 def log(message):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"{timestamp} > {message}")
+
+def handle_error(error):
+    error_message = str(error)
+    subprocess.run(["python", "repair_tool.py -error", error_message])
+
+def read_config(config_file='config.txt'):
+    config = {}
+    with open(config_file, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                key, value = line.split(' = ')
+                config[key.strip()] = value.strip()
+    return config
 
 def clear_console():
     if os.name == 'nt':  # For Windows
@@ -17,6 +28,10 @@ def clear_console():
         os.system('clear')
 
 def main():
+    config = read_config()
+    change_file = config['change_file']
+    check_interval = int(config['check_interval'])
+    
     while True:
         try:
             log("Updating Channel List...")
@@ -25,18 +40,17 @@ def main():
             log("Checking For New Videos...")
             subprocess.run(["python", "get_video_links.py"], check=True)
             
-            with open("change.txt", 'r') as cf:
+            with open(change_file, 'r') as cf:
                 change_status = cf.read().strip()
 
-            if change_status == "changed":
+            if "Changed" in change_status:
                 log("New Videos Detected. Starting Downloading:")
                 subprocess.run(["python", "download.py"], check=True)
             else:
                 log("No New Videos Detected. Skipping download.")
-            log("Sleeping for 2 minutes...")
-            time.sleep(120)
+            
+            time.sleep(check_interval)
             clear_console()
-        
         except Exception as e:
             log(f"Error occurred: {e}")
             handle_error(e)

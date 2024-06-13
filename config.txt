@@ -1,0 +1,21 @@
+# Configurations for YouTube Database Updater
+
+# Download quality (e.g., "highest" for highest resolution, "720p" for specific resolution)
+download_quality = highest
+
+# Number of videos to fetch from RSS feed
+num_videos_from_rss = 10
+num_videos_from_playlist = 10
+
+# Paths
+creators_folder = creators
+downloads_folder = downloads
+rss_file = rss.txt
+change_file = change.txt
+channels_file = channels.txt
+
+#If failed to connect to the server while downloading, how many times retry?
+max_retries = 5
+max_simultaneous_downloads = 2
+# Interval for checking new videos (in seconds)
+check_interval = 60
