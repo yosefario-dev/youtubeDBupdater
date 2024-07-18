@@ -2,10 +2,21 @@ import os
 import subprocess
 import time
 import datetime
+import time
+import random
 
+def type_p(text, avg_chars_per_second=30, random_delay=True):
+    delay = 1 / avg_chars_per_second
+    for char in text:
+        print(char, end='', flush=True)
+        if random_delay:
+            time.sleep(delay + random.uniform(-delay/2, delay/2))
+        else:
+            time.sleep(delay)
+    print()
 def log(message):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"{timestamp} > {message}")
+    type_p(f"{timestamp} > {message}")
 
 def handle_error(error):
     error_message = str(error)

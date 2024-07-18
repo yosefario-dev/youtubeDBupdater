@@ -2,9 +2,28 @@ import os
 import feedparser
 import datetime
 from pytube import Playlist
+import time
+import random
+import re
+
+def sanitize_filename(name):
+    # Replace invalid characters with underscores and strip trailing spaces
+    sanitized_name = re.sub(r'[<>:"/\\|?*]', '_', name).rstrip()
+    return sanitized_name
+
+def type_p(text, avg_chars_per_second=60, random_delay=True):
+    delay = 1 / avg_chars_per_second
+    for char in text:
+        print(char, end='', flush=True)
+        if random_delay:
+            time.sleep(delay + random.uniform(-delay/2, delay/2))
+        else:
+            time.sleep(delay)
+    print()
+
 def log(message):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"{timestamp} > {message}")
+    type_p(f"{timestamp} > {message}")
 
 def read_config(config_file='config.txt'):
     config = {}
@@ -15,10 +34,12 @@ def read_config(config_file='config.txt'):
                 key, value = line.split(' = ')
                 config[key.strip()] = value.strip()
     return config
+
 def get_playlist_links(link):
     playlist = Playlist(link)
     video_urls = [video.watch_url for video in playlist.videos]
     return video_urls
+
 def get_channel_title_from_rss(rss_link):
     config = read_config()
     rss_file = config['rss_file']
@@ -34,6 +55,7 @@ def get_channel_title_from_rss(rss_link):
             if rss_url == rss_link:
                 return channel_name
     return None
+
 def get_playlist_title(playlist_link):
     config = read_config()
     rss_file = config['rss_file']
@@ -74,13 +96,14 @@ def get_video_links_from_rss():
             continue
         channel_info, rss_link = parts
         channel_name, _ = channel_info.split(' :: ')
+        sanitized_channel_name = sanitize_filename(channel_name)
 
-        creator_folder = os.path.join(creators_folder, channel_name)
+        creator_folder = os.path.join(creators_folder, sanitized_channel_name)
         if not os.path.exists(creator_folder):
             os.makedirs(creator_folder, exist_ok=True)
         else:
             change_detected = True
-        video_links_file = os.path.join(creator_folder, f"{channel_name}.txt")
+        video_links_file = os.path.join(creator_folder, f"{sanitized_channel_name}.txt")
         if not os.path.exists(video_links_file):
             change_detected = True
 
@@ -103,8 +126,8 @@ def get_video_links_from_rss():
 
         if set(video_links) != set(existing_video_links):
             change_detected = True
-            updated_creators.append(channel_name)
-            log(f"Change detected for {channel_name}!")
+            updated_creators.append(sanitized_channel_name)
+            log(f"Change detected for {sanitized_channel_name}!")
 
     with open(change_file, 'w') as cf:
         if updated_creators:
